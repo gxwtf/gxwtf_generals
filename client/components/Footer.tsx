@@ -24,11 +24,11 @@ function Footer() {
     <FooterContainer>
       <div style={{ color: 'white' }}>
         {t('all-right-reserved')} © 2022~{new Date().getFullYear()} Gennia &nbsp;
-        {t('open-source-team')}
+        {t('open-source-team')} & 广学五题坊
       </div>
       {
         chinaWebsite && <a style={{ color: 'skyblue' }} href='https://beian.miit.gov.cn'>
-          粤ICP备2022122081号-2
+          京ICP备2025107534号-1
         </a>
       }
     </FooterContainer>
