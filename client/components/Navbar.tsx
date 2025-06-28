@@ -31,7 +31,7 @@ import {
 
 const navItems = [
   { href: '/', label: 'home', icon: <HomeRounded /> },
-  { href: 'https://docs.gennia.online/', label: 'wiki', icon: <BookRounded /> },
+  { href: 'https://gxwtf.cn/', label: 'wiki', icon: <BookRounded /> },
   {
     href: 'https://github.com/GenniaApp/GenniaServer2',
     label: 'github',
@@ -102,7 +102,7 @@ function Navbar() {
                 src='/img/gennia-logo.png'
                 width={100}
                 height={17.3}
-                alt='Gennia logo'
+                alt='Generals logo'
               />
             </Link>
           </Box>
@@ -151,7 +151,7 @@ function Navbar() {
                 src='/img/gennia-logo.png'
                 width={100}
                 height={17.3}
-                alt='Gennia logo'
+                alt='Generals logo'
               />
             </Link>
           </Box>

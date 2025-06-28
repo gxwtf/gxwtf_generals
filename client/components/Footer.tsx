@@ -23,8 +23,7 @@ function Footer() {
   return (
     <FooterContainer>
       <div style={{ color: 'white' }}>
-        {t('all-right-reserved')} © 2022~{new Date().getFullYear()} Gennia &nbsp;
-        {t('open-source-team')} & 广学五题坊
+        {t('all-right-reserved')} &copy; 2022~{new Date().getFullYear()} Gennia {t('open-source-team')}
       </div>
       {
         chinaWebsite && <a style={{ color: 'skyblue' }} href='https://beian.miit.gov.cn'>

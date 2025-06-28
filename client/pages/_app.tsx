@@ -13,7 +13,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Gennia</title>
+        <title>Generals</title>
       </Head>
       <Component {...pageProps} />
     </>

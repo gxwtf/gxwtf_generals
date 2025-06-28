@@ -9,7 +9,7 @@ function ReplayPage() {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Custom Map | Gennia</title>
+        <title>Custom Map | Generals</title>
       </Head>
       <Navbar />
       <MapEditor editMode={false} />
