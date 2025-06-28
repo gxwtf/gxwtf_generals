@@ -281,7 +281,7 @@ const server = app.listen(process.env.PORT, () => {
 const io = new Server(server, {
   cors: {
     origin: cors_urls,
-  },
+  }
 });
 
 function handleNeutralized(room: Room, player: Player) {
