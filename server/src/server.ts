@@ -33,6 +33,10 @@ console.log(cors_urls);
 app.use(express.json());
 app.use(cors({ origin: cors_urls }));
 
+app.get('/', (req: Request, res: Response) => {
+  res.status(200).json('');
+});
+
 app.get('/ping', (req: Request, res: Response) => {
   res.status(200).json('');
 });

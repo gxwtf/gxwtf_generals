@@ -34,7 +34,7 @@ export async function createRoom(
 // Bot
 roomPool['1'] = Room.create({
   id: '1',
-  roomName: '机器人Bot Room',
+  roomName: '机器人 Bot Room',
   keepAlive: true,
 });
 
