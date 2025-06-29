@@ -33,7 +33,7 @@ const navItems = [
   { href: '/', label: 'home', icon: <HomeRounded /> },
   { href: 'https://gxwtf.cn/', label: 'wiki', icon: <BookRounded /> },
   {
-    href: 'https://github.com/GenniaApp/GenniaServer2',
+    href: 'https://github.com/gxwtf/gxwtf_generals',
     label: 'github',
     icon: <GitHub />,
   },
@@ -43,7 +43,7 @@ const navItems = [
     icon: <SmartToyRounded />,
   },
   {
-    href: 'https://github.com/GenniaApp/GenniaServer2/issues',
+    href: 'https://github.com/gxwtf/gxwtf_generals/issues',
     label: 'feedback',
     icon: <FeedbackRounded />,
   },
