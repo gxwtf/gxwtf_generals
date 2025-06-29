@@ -99,9 +99,9 @@ function Navbar() {
               style={{ display: 'flex', alignItems: 'center', flexGrow: 0 }}
             >
               <Image
-                src='/img/gennia-logo.png'
-                width={100}
-                height={17.3}
+                src='/img/generals-logo.png'
+                width={50}
+                height={50}
                 alt='Generals logo'
               />
             </Link>
@@ -148,9 +148,9 @@ function Navbar() {
               style={{ display: 'flex', alignItems: 'center', flexGrow: 0 }}
             >
               <Image
-                src='/img/gennia-logo.png'
-                width={100}
-                height={17.3}
+                src='/img/generals-logo.png'
+                width={50}
+                height={50}
                 alt='Generals logo'
               />
             </Link>

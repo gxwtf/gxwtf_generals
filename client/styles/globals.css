@@ -88,7 +88,8 @@ body {
     sans-serif;
   /* Quicksand,serif */
   overflow: auto;
-  background-color: #121826;
+  /* background-color: #121826; */
+  background-color: #222222;
   /* background-image: url('/img/galaxy.jpg');
   background-position: center center;
   background-repeat: no-repeat;
@@ -243,7 +244,7 @@ a {
 
 .dock {
   backdrop-filter: blur(3px);
-  background-color: #212936 !important;
+  background-color: var(--primary-color) !important;
   border-radius: 0 0 24px 24px;
   display: flex !important;
   align-items: center;
@@ -274,7 +275,7 @@ a {
 
 .menu-container {
   backdrop-filter: blur(3px);
-  background-color: #212936 !important;
+  background-color: var(--primary-color) !important;
   border-radius: 24px;
   padding: 8px;
   margin-top: 10px;
@@ -283,7 +284,7 @@ a {
 
 .attack-button {
   backdrop-filter: blur(3px);
-  background-color: #212936 !important;
+  background-color: var(--primary-color) !important;
   border-radius: 10px !important;
   padding: 8px;
   color: black;
@@ -365,7 +366,7 @@ a {
 /* 滚动条滑块样式 */
 ::-webkit-scrollbar-thumb {
   border-radius: 5px;
-  background-color: #212936;
+  background-color: var(--primary-color);
   /* 滑块背景色 */
 }
 

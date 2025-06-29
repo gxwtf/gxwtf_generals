@@ -17,7 +17,7 @@ const ChatBoxContainer = styled("div")`
   overflow: auto;
   z-index: 1003;
   backdrop-filter: blur(3px);
-  background-color: #212936 !important;
+  background-color: var(--primary-color) !important;
   border-radius: 24px 0 0 0;
   box-shadow:
     0px 2px 4px -1px rgba(0, 0, 0, 0.2),

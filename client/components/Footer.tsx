@@ -13,7 +13,7 @@ const FooterContainer = styled('div')`
   left: 0;
   z-index: 80;
   backdrop-filter: blur(3px);
-  background-color: #212936 !important;
+  background-color: var(--primary-color) !important;
 `;
 
 function Footer() {
