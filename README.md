@@ -77,6 +77,7 @@ First, run the development server:
 
 ```bash
 cd client/
+cp .env.example .env
 pnpm install
 pnpm run dev
 ```
@@ -89,6 +90,7 @@ ps: server side code init from [template](https://github.com/nisicadmir/nodejs-t
 
 ```bash
 cd server/
+cp .env.example .env
 pnpm install
 pnpm run dev
 ```
