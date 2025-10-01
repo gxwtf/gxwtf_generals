@@ -183,7 +183,8 @@ function GameMap() {
 
   const handleTouchStart = useCallback(
     (event: TouchEvent) => {
-      event.preventDefault();
+      // 移除 event.preventDefault() 让点击事件能够正常触发
+      // event.preventDefault();
 
       if (event.touches.length === 1) {
         // touch drag or touch attack
@@ -204,19 +205,21 @@ function GameMap() {
             // console.log('touch drag at ', x, y);
           } else {
             touchAttacking.current = true;
-            if (
-              lastTouchPosition.current.x === x &&
-              lastTouchPosition.current.y === y &&
-              currentTime - lastTouchTime.current <= 400 // quick double touch 400ms
-            ) {
-              touchHalf.current = !touchHalf.current;
-            }
-            setSelectedMapTileInfo({
-              x,
-              y,
-              half: touchHalf.current,
-              unitsCount: 0,
-            });
+            // 移除直接的分兵逻辑，让点击事件通过handleClick处理
+            // 只记录触摸位置和时间，不直接处理分兵
+            // if (
+            //   lastTouchPosition.current.x === x &&
+            //   lastTouchPosition.current.y === y &&
+            //   currentTime - lastTouchTime.current <= 400 // quick double touch 400ms
+            // ) {
+            //   touchHalf.current = !touchHalf.current;
+            // }
+            // setSelectedMapTileInfo({
+            //   x,
+            //   y,
+            //   half: touchHalf.current,
+            //   unitsCount: 0,
+            // });
             lastTouchPosition.current = { x, y };
             lastTouchTime.current = currentTime;
           }
@@ -237,7 +240,8 @@ function GameMap() {
 
   const handleTouchMove = useCallback(
     (event: TouchEvent) => {
-      event.preventDefault();
+      // 移除 event.preventDefault() 让点击事件能够正常触发
+      // event.preventDefault();
 
       if (event.touches.length === 1) {
         if (touchDragging.current) {
@@ -312,10 +316,37 @@ function GameMap() {
     [mapRef, setPosition, tileSize, zoom, selectedMapTileInfo, mapData, handlePositionChange, setZoom]
   );
 
+  // const handleTouchEnd = useCallback((event: TouchEvent) => {
+  //   // 如果是单指触摸且没有拖动，则触发点击事件
+  //   if (event.touches.length === 0 && !touchDragging.current && touchAttacking.current) {
+  //     if (mapRef.current) {
+  //       const touch = event.changedTouches[0];
+  //       const rect = mapRef.current.getBoundingClientRect();
+  //       const y = Math.floor((touch.clientX - rect.left) / (tileSize * zoom));
+  //       const x = Math.floor((touch.clientY - rect.top) / (tileSize * zoom));
+  //       const [tileType, color] = mapData[x][y];
+
+  //       // 模拟点击事件，调用handleClick函数
+  //       handleClick([tileType, color, 0], x, y, myPlayerIndex);
+  //     }
+  //   }
+
+  //   touchAttacking.current = false;
+  //   touchDragging.current = false;
+  // }, [mapRef, tileSize, zoom, mapData, myPlayerIndex, handleClick]);
+
   const handleTouchEnd = useCallback((event: TouchEvent) => {
+    // 如果是单指触摸且没有拖动，则应该触发点击事件
+    // 点击事件会通过正常的onClick处理流程，包括分兵逻辑
+    if (event.touches.length === 0 && !touchDragging.current && touchAttacking.current) {
+      // 这里不需要手动调用handleClick，因为触摸事件结束后
+      // 浏览器会自动触发click事件，由MapTile的onClick处理
+    }
+
     touchAttacking.current = false;
     touchDragging.current = false;
   }, []);
+
 
   useEffect(() => {
     const mapNode = mapRef.current;
@@ -340,10 +371,10 @@ function GameMap() {
     const mapNode = mapRef.current;
     if (mapNode) {
       mapNode.addEventListener('touchstart', handleTouchStart, {
-        passive: false,
+        passive: true, // 改为 true 让点击事件能够正常触发
       });
       mapNode.addEventListener('touchmove', handleTouchMove, {
-        passive: false,
+        passive: true, // 改为 true 让点击事件能够正常触发
       });
       mapNode.addEventListener('touchend', handleTouchEnd);
       return () => {
