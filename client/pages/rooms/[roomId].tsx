@@ -9,7 +9,7 @@ function RoomPage() {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Gaming Room | Generals</title>
+        <title>Gaming Room | Jiangjunqi</title>
       </Head>
       <GameProvider>
         <GameRoom />

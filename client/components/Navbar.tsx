@@ -38,17 +38,12 @@ const navItems = [
     icon: <GitHub />,
   },
   {
-    href: 'https://github.com/GenniaApp/GenniaBot',
-    label: 'bot-api',
-    icon: <SmartToyRounded />,
-  },
-  {
     href: 'https://github.com/gxwtf/gxwtf_generals/issues',
     label: 'feedback',
     icon: <FeedbackRounded />,
   },
   {
-    href: 'http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=VAwNA8NiYUMsPHrBxLso-t09saGZCT14&authKey=fFpto%2Ff%2FhNUpcxZhSVZt6msLOZrMhW3e14mypEBlO3Ih7PdqOmXq%2FQ0OlV3D%2BuyO&noverify=0&group_code=374889821',
+    href: 'https://gxwtf.cn/markdown/preview?file=public%2Fannouncements%2Fclub.md',
     label: 'qq-group',
     icon: <Contacts />,
   },
@@ -102,7 +97,7 @@ function Navbar() {
                 src='/img/generals-logo.png'
                 width={50}
                 height={50}
-                alt='Generals logo'
+                alt='Jiangjunqi logo'
               />
             </Link>
           </Box>
@@ -151,7 +146,7 @@ function Navbar() {
                 src='/img/generals-logo.png'
                 width={50}
                 height={50}
-                alt='Generals logo'
+                alt='Jiangjunqi logo'
               />
             </Link>
           </Box>

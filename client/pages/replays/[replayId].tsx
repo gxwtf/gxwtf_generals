@@ -8,7 +8,7 @@ function ReplayPage() {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Replay | Generals</title>
+        <title>Replay | Jiangjunqi</title>
       </Head>
       <GameReplay />
     </ThemeProvider>

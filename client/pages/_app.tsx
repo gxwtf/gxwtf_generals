@@ -13,7 +13,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Generals</title>
+        <title>Jiangjunqi</title>
       </Head>
       <Component {...pageProps} />
     </>

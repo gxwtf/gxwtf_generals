@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <ThemeProvider theme={theme}>
       <Head>
-        <title>Map Creator | Generals</title>
+        <title>Map Creator | Jiangjunqi</title>
       </Head>
       <Navbar />
       <MapEditor editMode={true} />
