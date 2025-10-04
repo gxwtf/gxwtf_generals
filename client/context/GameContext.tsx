@@ -261,7 +261,7 @@ const GameProvider: React.FC<GameProviderProp> = ({ children }) => {
     ]
   );
 
-  const handleClick = useCallback((tile: TileProp, x: number, y: number, myPlayerIndex: number) => {
+  const handleClick = useCallback((tile: TileProp, x: number, y: number, myPlayerIndex: number, lastTouchTime: number) => {
     const [tileType, color, unitsCount] = tile;
     const isOwned = color === room.players[myPlayerIndex].color;
 
@@ -292,7 +292,8 @@ const GameProvider: React.FC<GameProviderProp> = ({ children }) => {
     if (isNextPossibleMove) {
       handlePositionChange(selectedMapTileInfo, { x, y }, `queue_${moveDirection}`);
     } else if (isOwned) {
-      if (selectedMapTileInfo.x === x && selectedMapTileInfo.y === y) {
+      console.log('try change tile half state',new Date().getTime(),lastTouchTime);
+      if (selectedMapTileInfo.x === x && selectedMapTileInfo.y === y && (new Date().getTime()) - lastTouchTime <= 400) {
         console.log(
           'Clicked on the current tile, changing tile half state to',
           !tileHalf

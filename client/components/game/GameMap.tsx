@@ -221,7 +221,7 @@ function GameMap() {
             //   unitsCount: 0,
             // });
             lastTouchPosition.current = { x, y };
-            lastTouchTime.current = currentTime;
+            // lastTouchTime.current = currentTime;
           }
         }
       } else if (event.touches.length === 2) {
@@ -419,7 +419,10 @@ function GameMap() {
           return tiles.map((tile, y) => {
             return (
               <div key={`${x}/${y}`}
-                onClick={() => handleClick(tile.tile, x, y, myPlayerIndex)}>
+                onClick={() => {
+                  handleClick(tile.tile, x, y, myPlayerIndex,lastTouchTime.current);
+                  lastTouchTime.current=new Date().getTime();
+                }}>
                 <MapTile
                   isNextPossibleMove={testIfNextPossibleMove(tile.tile[0], x, y)}
                   zoom={zoom}
