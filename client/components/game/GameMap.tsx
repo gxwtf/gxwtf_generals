@@ -420,7 +420,7 @@ function GameMap() {
             return (
               <div key={`${x}/${y}`}
                 onClick={() => {
-                  handleClick(tile.tile, x, y, myPlayerIndex,lastTouchTime.current);
+                  handleClick(tile.tile, x, y, myPlayerIndex, lastTouchTime.current);
                   lastTouchTime.current=new Date().getTime();
                 }}>
                 <MapTile

@@ -293,7 +293,7 @@ const GameProvider: React.FC<GameProviderProp> = ({ children }) => {
       handlePositionChange(selectedMapTileInfo, { x, y }, `queue_${moveDirection}`);
     } else if (isOwned) {
       console.log('try change tile half state',new Date().getTime(),lastTouchTime);
-      if (selectedMapTileInfo.x === x && selectedMapTileInfo.y === y && (new Date().getTime()) - lastTouchTime <= 400) {
+      if (selectedMapTileInfo.x === x && selectedMapTileInfo.y === y && (new Date().getTime()) - lastTouchTime <= 200) {
         console.log(
           'Clicked on the current tile, changing tile half state to',
           !tileHalf
