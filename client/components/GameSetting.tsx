@@ -21,6 +21,13 @@ import {
   Link,
   ToggleButtonGroup,
   ToggleButton,
+  Chip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -30,6 +37,9 @@ import LocationCityIcon from '@mui/icons-material/LocationCity';
 import WaterIcon from '@mui/icons-material/Water';
 import GroupIcon from '@mui/icons-material/Group';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import AddIcon from '@mui/icons-material/Add';
+import RemoveIcon from '@mui/icons-material/Remove';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { useTranslation } from 'next-i18next';
 
 import SliderBox from './SliderBox';
@@ -64,12 +74,93 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
   const [forceStart, setForceStart] = useState(false);
   const [openMapExplorer, setOpenMapExplorer] = useState(false);
 
+  // Bot相关状态
+  const [availableBotTypes, setAvailableBotTypes] = useState<string[]>([]);
+  const [botError, setBotError] = useState<string>('');
+
   const { room, socketRef, myPlayerId, myUserName, team } = useGame();
   const { roomDispatch, snackStateDispatch } = useGameDispatch();
 
   const { t } = useTranslation();
 
   const router = useRouter();
+
+  const BOT_SERVER_URL = process.env.NEXT_PUBLIC_BOT_SERVER_URL || 'http://localhost:1214';
+
+  // 获取可用的机器人种类
+  const fetchBotTypes = useCallback(async () => {
+    try {
+      const response = await fetch(`${BOT_SERVER_URL}/type/`);
+      if (!response.ok) throw new Error('Failed to fetch bot types');
+      const data = await response.json();
+      setAvailableBotTypes(data.bot_types || []);
+      setBotError('');
+    } catch (error) {
+      setBotError('机器人服务器连接失败');
+      console.error('Error fetching bot types:', error);
+    }
+  }, [BOT_SERVER_URL]);
+
+  // 添加机器人
+  const handleAddBot = async (botType: string) => {
+    try {
+      const response = await fetch(`${BOT_SERVER_URL}/add/?roomId=${room.id}&type=${botType}`);
+      if (response.ok) {
+        snackStateDispatch({
+          type: 'update',
+          title: '',
+          message: `${t('bot-added-success')} ${botType}`,
+          status: 'success',
+          duration: 2000,
+        });
+      } else {
+        throw new Error('Failed to add bot');
+      }
+    } catch (error) {
+      snackStateDispatch({
+        type: 'update',
+        title: '',
+        message: `${t('bot-add-failed')} ${botType}`,
+        status: 'error',
+        duration: 2000,
+      });
+      console.error('Error adding bot:', error);
+    }
+  };
+
+  // 移除机器人
+  const handleRemoveBot = async (botType: string) => {
+    try {
+      const response = await fetch(`${BOT_SERVER_URL}/remove/?roomId=${room.id}&type=${botType}`);
+      if (response.ok) {
+        snackStateDispatch({
+          type: 'update',
+          title: '',
+          message: `${t('bot-removed-success')} ${botType}`,
+          status: 'success',
+          duration: 2000,
+        });
+      } else {
+        throw new Error('Failed to remove bot');
+      }
+    } catch (error) {
+      snackStateDispatch({
+        type: 'update',
+        title: '',
+        message: `${t('bot-remove-failed')} ${botType}`,
+        status: 'error',
+        duration: 2000,
+      });
+      console.error('Error removing bot:', error);
+    }
+  };
+
+  // 初始化时获取机器人数据
+  useEffect(() => {
+    if (room.id) {
+      fetchBotTypes();
+    }
+  }, [room.id, fetchBotTypes]);
 
   useEffect(() => {
     setShareLink(window.location.href);
@@ -310,6 +401,7 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
             <Tab label={t('map')} />
             <Tab label={t('terrain')} />
             <Tab label={t('modifiers')} />
+            <Tab label={t('bot')} />
           </Tabs>
           <TabPanel value={tabIndex} index={0}>
             <Box sx={{ display: 'flex', flexDirection: 'column', padding: 0 }}>
@@ -490,6 +582,61 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
                   label={t('warring-states-mode')}
                 />
               </FormGroup>
+            </Box>
+          </TabPanel>
+          <TabPanel value={tabIndex} index={5}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {botError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {botError}
+                </Alert>
+              )}
+              <Box>
+                <Typography
+                  sx={{
+                    mr: 2,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {t('available-bot-types')}
+                </Typography>
+                {availableBotTypes.length > 0 ? (
+                  <List dense>
+                    {availableBotTypes.map((botType, index) => (
+                      <ListItem key={index}>
+                        <ListItemText primary={botType} />
+                        <ListItemSecondaryAction>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <IconButton
+                              edge="end"
+                              onClick={() => handleAddBot(botType)}
+                              disabled={disabled_ui}
+                            >
+                              <AddIcon />
+                            </IconButton>
+                            <IconButton
+                              edge="end"
+                              onClick={() => handleRemoveBot(botType)}
+                              disabled={disabled_ui}
+                            >
+                              <RemoveIcon />
+                            </IconButton>
+                          </Box>
+                        </ListItemSecondaryAction>
+                      </ListItem>
+                    ))}
+                  </List>
+                ) : (
+                  <Typography
+                    sx={{
+                      mr: 2,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {t('no-bots-available')}
+                  </Typography>
+                )}
+              </Box>
             </Box>
           </TabPanel>
         </CardContent>
