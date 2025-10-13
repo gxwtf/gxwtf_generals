@@ -32,11 +32,11 @@ export async function createRoom(
 }
 
 // Bot
-roomPool['1'] = Room.create({
-  id: '1',
-  roomName: '机器人 Bot Room',
-  keepAlive: true,
-});
+// roomPool['1'] = Room.create({
+//   id: '1',
+//   roomName: '机器人 Bot Room',
+//   keepAlive: true,
+// });
 
 // Warring state
 roomPool['warring_state'] = Room.create({

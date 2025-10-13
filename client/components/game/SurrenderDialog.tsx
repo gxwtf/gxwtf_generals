@@ -23,9 +23,12 @@ export default function SurrenderDialog({
   setOpen: any;
   handleSurrender: () => void;
 }) {
-  const { openOverDialog, isSurrendered, team, roomUiStatus } = useGame();
+  const { openOverDialog, isSurrendered, team, roomUiStatus, room, myPlayerId, socketRef } = useGame();
   const { t } = useTranslation();
   const router = useRouter();
+  
+  // 房主状态
+  const [isHost, setIsHost] = useState(false);
 
   const handleClose = useCallback(
     (event: any, reason: string) => {
@@ -59,6 +62,22 @@ export default function SurrenderDialog({
     router.push('/');
   }, [router, setOpen]);
 
+  // 房主操作函数
+  const handleHostAction = (action: 'leave_room') => {
+    console.log('Host action:', action);
+    socketRef.current.emit('end_room_game', action);
+    setOpen(false);
+    router.push('/');
+  };
+
+  // 检查是否是房主
+  useEffect(() => {
+    if (room && room.players && myPlayerId) {
+      const currentPlayer = room.players.find(player => player.id === myPlayerId);
+      setIsHost(currentPlayer ? currentPlayer.isRoomHost : false);
+    }
+  }, [room, myPlayerId]);
+
   useEffect(() => {
     window.addEventListener('keydown', handleKeydown);
 
@@ -90,9 +109,16 @@ export default function SurrenderDialog({
         }}
       >
         {showExitTitle ? (
-          <Button sx={{ width: '100%' }} onClick={handleExit}>
-            {t('exit')}
-          </Button>
+          <>
+            <Button sx={{ width: '100%' }} onClick={handleExit}>
+              {t('exit')}
+            </Button>
+            {isHost && (
+              <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('leave_room')}>
+                {t('close-room')}
+              </Button>
+            )}
+          </>
         ) : (
           <>
             <Button sx={{ width: '100%' }} onClick={handleCloseSurrender}>

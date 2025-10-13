@@ -74,6 +74,34 @@ app.get('/get_replay/:replayId', async (req: Request, res: Response) => {
   });
 });
 
+app.delete('/rooms/:roomId', async (req: Request, res: Response) => {
+  const roomId = req.params.roomId;
+  
+  if (!roomPool[roomId]) {
+    res.status(404).json({ error: 'Room not found' });
+    return;
+  }
+
+  const room = roomPool[roomId];
+  
+  // 如果游戏正在进行，停止游戏循环
+  if (room.gameStarted && room.gameLoop) {
+    clearInterval(room.gameLoop);
+  }
+  
+  // 通知所有玩家房间被删除
+  if (io) {
+    io.in(roomId).emit('room_deleted', 'Room has been deleted by admin');
+    io.in(roomId).disconnectSockets(true);
+  }
+  
+  // 从房间池中删除房间
+  delete roomPool[roomId];
+  
+  console.log(`Room ${roomId} deleted by admin API`);
+  res.status(200).json({ success: true, message: `Room ${roomId} deleted successfully` });
+});
+
 app.get('/maps', async (req, res) => {
   const maps = await prisma.customMapData.findMany({
     select: {
@@ -325,6 +353,38 @@ async function handleDisconnectInRoom(room: Room, player: Player, io: Server) {
       if (room.players[0]) room.players[0].setRoomHost(true);
     }
     io.in(room.id).emit('update_room', room);
+  } catch (e: any) {
+    console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
+    console.log(e.stack);
+  }
+}
+
+async function endRoomGame(room: Room, io: Server, reason: string = 'Game ended by host') {
+  try {
+    // 如果游戏正在进行，停止游戏循环
+    if (room.gameStarted && room.gameLoop) {
+      clearInterval(room.gameLoop);
+      room.gameStarted = false;
+    }
+    
+    // 重置所有玩家状态
+    room.players.forEach((player) => {
+      player.reset();
+      player.disconnected = false;
+    });
+    
+    // 重置房间状态
+    room.forceStartNum = 0;
+    room.mapGenerated = false;
+    room.map = null;
+    room.globalMapDiff = null;
+    room.gameRecord = null;
+    
+    // 通知所有玩家游戏结束
+    io.in(room.id).emit('room_message', null, reason);
+    io.in(room.id).emit('update_room', room);
+    
+    console.log(`Room ${room.id} game ended: ${reason}`);
   } catch (e: any) {
     console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
     console.log(e.stack);
@@ -815,6 +875,41 @@ io.on('connection', async (socket) => {
     } catch (e: any) {
       console.log(e.stack);
       console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
+    }
+  });
+
+  socket.on('end_room_game', async (action: 'end_game' | 'leave_room') => {
+    try {
+      if (!player.isRoomHost) {
+        socket.emit('error', 'End game failed', 'You are not the room host.');
+        return;
+      }
+
+      if (action === 'end_game') {
+        // 结束游戏但保留房间
+        await endRoomGame(room, io, 'Game ended by host');
+        socket.emit('room_message', player.minify(), 'ended the game.');
+      } else if (action === 'leave_room') {
+        // 结束游戏并删除房间
+        await endRoomGame(room, io, 'Room closed by host');
+        
+        // 通知所有玩家房间被删除
+        io.in(room.id).emit('room_deleted', 'Room has been closed by host');
+        
+        // 断开所有玩家的连接
+        io.in(room.id).disconnectSockets(true);
+        
+        // 从房间池中删除房间（如果不是keepAlive房间）
+        if (!room.keepAlive) {
+          delete roomPool[room.id];
+        }
+        
+        console.log(`Room ${room.id} closed by host ${player.username}`);
+      }
+    } catch (e: any) {
+      socket.emit('error', 'End game failed', e.message);
+      console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
+      console.log(e.stack);
     }
   });
 

@@ -358,6 +358,22 @@ function GamingRoom() {
       }
     });
 
+    socket.on('room_deleted', (message: string) => {
+      console.log('Room deleted:', message);
+      snackStateDispatch({
+        type: 'update',
+        title: 'Room Closed',
+        status: 'info',
+        message: message,
+        duration: 5000,
+      });
+      
+      // 延迟跳转回主页
+      setTimeout(() => {
+        router.push('/');
+      }, 3000);
+    });
+
     return () => {
       socketRef.current.disconnect();
     };
