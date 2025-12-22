@@ -83,27 +83,27 @@ pnpm run dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### server: express + socket.io
-
-ps: server side code init from [template](https://github.com/nisicadmir/nodejs-typescript/tree/master/tutorial-5)
-
-```bash
-cd server/
-pnpm install
-pnpm run dev
-```
-
 #### database
 
 We use postgresql + prisma
 
 - see `.env.example` to config prisma env correctly
-- if you init repo or edit prisma schema, run `npx prisma migrate dev` to make sure update schema in database and update prisma client
+- if you init repo or edit prisma schema, run `pnpx prisma migrate dev` to make sure update schema in database and update prisma client
 
 ```
 npx prisma generate # generate prisma client code
 npx prisma migrate dev # migrate
 pnpm dlx prisma studio # open databaseUI
+```
+
+### server: express + socket.io
+
+
+```bash
+cd server/
+pnpm install
+pnpm dlx prisma migrate dev
+pnpm run dev
 ```
 
 #### docker

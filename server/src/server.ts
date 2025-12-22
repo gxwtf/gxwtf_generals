@@ -7,7 +7,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 import { ColorArr, MaxTeamNum, forceStartOK } from './lib/constants';
 import { roomPool, createRoom } from './lib/room-pool';

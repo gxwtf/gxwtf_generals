@@ -11,6 +11,10 @@ install_in_china:
 	pnpm config set sharp_libvips_binary_host "https://npmmirror.com/mirrors/sharp-libvips"
 	pnpm install sharp
 
+initdb:
+	echo "请在 server/.env 中配置你的 DATABASE_URL"
+	cd server && pnpm dlx prisma migrate dev
+
 .PHONY: deploy # change `client/.env.production` & `server/.env` to your own settings, for example, change gennia.online to gennia.cn
 deploy:
 	cd client && pnpm run build
