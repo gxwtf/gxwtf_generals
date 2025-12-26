@@ -51,3 +51,5 @@ Thumbs.db
 /prisma/migrations
 /prisma/generals.db
 /prisma/generals.db-journal
+
+package-lock.json

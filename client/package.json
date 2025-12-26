@@ -3,9 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 1213",
+    "dev": "next dev",
     "build": "next build",
-    "start": "next start -p 1984",
+    "start": "next start",
     "lint": "next lint",
     "format": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore --ignore-path .prettierignore ."
@@ -31,7 +31,7 @@
     "react-dom": "18.2.0",
     "react-i18next": "^13.0.2",
     "react-markdown": "^8.0.7",
-    "sharp": "^0.32.3",
+    "sharp": "^0.32.6",
     "socket.io-client": "^4.7.1",
     "typescript": "4.8.4",
     "uuid": "^9.0.0"

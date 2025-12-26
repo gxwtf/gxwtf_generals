@@ -420,8 +420,8 @@ async function handleGame(room: Room, io: Server) {
       };
       room.map = GameMap.from_custom_map(customMapData, room.players, room.revealKing);
     } else {
-      let actualWidth = Math.ceil(Math.sqrt(room.players.length) * 5 + 12 * room.mapWidth);
-      let actualHeight = Math.ceil(Math.sqrt(room.players.length) * 5 + 12 * room.mapHeight);
+      let actualWidth = Math.ceil(Math.sqrt(room.players.length) * 5 + 15 * room.mapWidth);
+      let actualHeight = Math.ceil(Math.sqrt(room.players.length) * 5 + 15 * room.mapHeight);
       room.map = new GameMap(
         'random_map_id',
         'random_map_name',
