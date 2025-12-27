@@ -116,6 +116,7 @@
   "expandWSAD": "Expand WSAD",
   "disconnect-from-server": "Disconnected from server.",
   "close-room": "Close Room",
+  "force-end": "Force End",
   "delete": "Delete",
   "deleting": "Deleting",
   "confirm-delete": "Confirm Delete",

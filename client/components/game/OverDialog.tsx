@@ -15,11 +15,28 @@ import {
 } from '@mui/material';
 
 export default function OverDialog() {
-  const { myPlayerId, room, dialogContent, openOverDialog } = useGame();
+  const { myPlayerId, room, dialogContent, openOverDialog, socketRef } = useGame();
   const { setRoomUiStatus, setOpenOverDialog } = useGameDispatch();
   const [replayLink, setReplayLink] = React.useState('');
   const { t } = useTranslation();
   const router = useRouter();
+
+  // 检查是否是房主
+  const isHost = React.useMemo(() => {
+    if (room && room.players && myPlayerId) {
+      const currentPlayer = room.players.find(player => player.id === myPlayerId);
+      return currentPlayer ? currentPlayer.isRoomHost : false;
+    }
+    return false;
+  }, [room, myPlayerId]);
+
+  // 强制停止游戏函数
+  const handleForceStop = () => {
+    if (isHost && socketRef.current) {
+      socketRef.current.emit('force_end');
+      setOpenOverDialog(false);
+    }
+  };
 
   let title: string = '';
   let subtitle: string = '';
@@ -89,6 +106,11 @@ export default function OverDialog() {
         <Button sx={{ width: '100%' }} onClick={handleBackRoom}>
           {room.gameStarted ? t('spectate') : t('play-again')}
         </Button>
+        {isHost && room?.gameStarted && (
+          <Button color='warning' sx={{ width: '100%' }} onClick={handleForceStop}>
+            {t('force-end')}
+          </Button>
+        )}
         {replayLink && (
           <Button sx={{ width: '100%' }} onClick={handleWatchReplay}>
             {t('watch-replay')}

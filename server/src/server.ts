@@ -76,7 +76,6 @@ app.get('/get_replay/:replayId', async (req: Request, res: Response) => {
 
 app.delete('/rooms/:roomId', async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-
   if (!roomPool[roomId]) {
     res.status(404).json({ error: 'Room not found' });
     return;
@@ -382,6 +381,9 @@ async function endRoomGame(room: Room, io: Server, reason: string = 'Game ended 
     io.in(room.id).emit('room_message', null, reason);
     io.in(room.id).emit('update_room', room);
 
+    // 发送game_ended事件，让客户端显示游戏结束对话框
+    io.in(room.id).emit('game_ended', [], ''); // 空数组表示没有胜利者，空字符串表示没有回放链接
+
     console.log(`Room ${room.id} game ended: ${reason}`);
   } catch (e: any) {
     console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
@@ -672,7 +674,6 @@ io.on('connection', async (socket) => {
       .randomBytes(Math.ceil(10 / 2))
       .toString('hex')
       .slice(0, 10);
-
     let allColor = Array.from({ length: ColorArr.length }, (_, i) => i);
     let occupiedColor = room.players.map((player) => player.color);
     occupiedColor.push(0); // 0 is reserved for neutral block
@@ -958,6 +959,29 @@ io.on('connection', async (socket) => {
       }
     } catch (e: any) {
       socket.emit('error', 'End game failed', e.message);
+      console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
+      console.log(e.stack);
+    }
+  });
+
+  socket.on('force_end', async () => {
+    try {
+      if (!player.isRoomHost) {
+        socket.emit('error', 'Force stop failed', 'You are not the room host.');
+        return;
+      }
+
+      if (!room.gameStarted) {
+        socket.emit('error', 'Force stop failed', 'Game is not started.');
+        return;
+      }
+
+      // 强制停止游戏
+      await endRoomGame(room, io, 'Game force stopped by host');
+      socket.emit('room_message', player.minify(), 'force stopped the game.');
+      console.log(`Room ${room.id} game force stopped by host ${player.username}`);
+    } catch (e: any) {
+      socket.emit('error', 'Force stop failed', e.message);
       console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
       console.log(e.stack);
     }

@@ -117,6 +117,7 @@
   "expandWSAD": "展开WSAD",
   "disconnect-from-server": "与服务器断开连接",
   "close-room": "关闭房间",
+  "force-end": "强制结束",
   "delete": "删除",
   "deleting": "删除中",
   "confirm-delete": "确认删除",

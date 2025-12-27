@@ -26,7 +26,7 @@ export default function SurrenderDialog({
   const { openOverDialog, isSurrendered, team, roomUiStatus, room, myPlayerId, socketRef } = useGame();
   const { t } = useTranslation();
   const router = useRouter();
-  
+
   // 房主状态
   const [isHost, setIsHost] = useState(false);
 
@@ -63,11 +63,16 @@ export default function SurrenderDialog({
   }, [router, setOpen]);
 
   // 房主操作函数
-  const handleHostAction = (action: 'leave_room') => {
+  const handleHostAction = (action: 'leave_room' | 'force_end') => {
     console.log('Host action:', action);
-    socketRef.current.emit('end_room_game', action);
-    setOpen(false);
-    router.push('/');
+    if (action === 'force_end') {
+      socketRef.current.emit('force_end');
+      setOpen(false);
+    } else {
+      socketRef.current.emit('end_room_game', action);
+      setOpen(false);
+      router.push('/');
+    }
   };
 
   // 检查是否是房主
@@ -114,9 +119,16 @@ export default function SurrenderDialog({
               {t('exit')}
             </Button>
             {isHost && (
-              <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('leave_room')}>
-                {t('close-room')}
-              </Button>
+              <>
+                <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('leave_room')}>
+                  {t('close-room')}
+                </Button>
+                {room?.gameStarted && (
+                  <Button color='warning' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
+                    {t('force-end')}
+                  </Button>
+                )}
+              </>
             )}
           </>
         ) : (
@@ -124,6 +136,11 @@ export default function SurrenderDialog({
             <Button sx={{ width: '100%' }} onClick={handleCloseSurrender}>
               {t('surrender')}
             </Button>
+            {isHost && room?.gameStarted && (
+              <Button color='warning' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
+                {t('force-end')}
+              </Button>
+            )}
           </>
         )}
         <Button
