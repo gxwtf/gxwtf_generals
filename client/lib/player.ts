@@ -20,6 +20,7 @@ class Player {
     // when player disconnect, don't delete to keep game data
     // clear disconnect player when game ended
     public disconnected: boolean = false,
+    public isBot: boolean = false, // 新增：是否为机器人
   ) { }
 
   setSpectate(): void { this.team = MaxTeamNum + 1; }
@@ -27,8 +28,8 @@ class Player {
 
   minify(withId?: boolean): UserData {
     return withId
-      ? { id: this.id, username: this.username, color: this.color }
-      : { username: this.username, color: this.color };
+      ? { id: this.id, username: this.username, color: this.color, isBot: this.isBot }
+      : { username: this.username, color: this.color, isBot: this.isBot };
   }
 
   toJSON() {

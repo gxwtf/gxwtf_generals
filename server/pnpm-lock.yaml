@@ -2090,9 +2090,7 @@ snapshots:
 
   prisma@5.0.0:
     dependencies:
-      '@prisma/engines': 5.22.0
-    optionalDependencies:
-      fsevents: 2.3.3
+      '@prisma/engines': 5.0.0
 
   progress@2.0.3: {}
 

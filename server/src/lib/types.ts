@@ -43,6 +43,7 @@ export interface UserData {
   team?: string;
   username: string;
   color: number;
+  isBot?: boolean; // 新增：是否为机器人
 }
 
 export class Message {

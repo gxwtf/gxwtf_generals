@@ -74,7 +74,6 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
   const [forceStart, setForceStart] = useState(false);
   const [openMapExplorer, setOpenMapExplorer] = useState(false);
 
-  // Bot相关状态
   const [availableBotTypes, setAvailableBotTypes] = useState<string[]>([]);
   const [botError, setBotError] = useState<string>('');
 
@@ -86,6 +85,69 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
   const router = useRouter();
 
   const BOT_SERVER_URL = process.env.NEXT_PUBLIC_BOT_SERVER_URL || 'http://localhost:1214';
+
+  // 检查是否所有人类玩家都是观战者（以 team === MaxTeamNum + 1 为准）
+  // spectator = team === MaxTeamNum + 1
+  const isAllHumanSpectators = (() => {
+    if (!room.players || room.players.length === 0) return false;
+
+    const humanPlayers = room.players.filter(player => !player.isBot);
+    if (humanPlayers.length === 0) return false;
+
+    const result = humanPlayers.every(player => {
+      // 兼容老逻辑：如果服务器有 spectating 字段也一起判断
+      return player.team === MaxTeamNum + 1 || player.spectating;
+    });
+
+
+    return result;
+  })();
+
+  // 检查当前玩家是否是房主
+  const isHost = useMemo(() => {
+    if (!myPlayerId || !room.players) return false;
+
+    const myPlayer = room.players.find(player => player.id === myPlayerId);
+    const result = myPlayer ? myPlayer.isRoomHost : false;
+
+
+    return result;
+  }, [myPlayerId, room.players]);
+
+  // 计算非观战玩家数量（包括AI）
+  const nonSpectatingPlayersCount = useMemo(() => {
+    const count = room.players.filter(player => !player.spectating).length;
+
+
+    return count;
+  }, [room.players]);
+
+  // 统计作为 player 的机器人数量（严格按 team 判断 spectator）
+  const botPlayerCount = useMemo(() => {
+    if (!room.players || room.players.length === 0) return 0;
+
+    const count = room.players.filter(player =>
+      player.isBot && (player.team !== MaxTeamNum + 1) && !player.spectating
+    ).length;
+
+    return count;
+  }, [room.players]);
+
+  // 特殊开始按钮逻辑：当所有人类都是观战者且当前玩家是房主时显示开始按钮
+  const showSpecialStartButton = isAllHumanSpectators && isHost;
+
+  // 特殊开始按钮的启用条件：作为 player 的 bot 数量 > 1
+  const isSpecialStartButtonEnabled = botPlayerCount > 1;
+
+  // 调试特殊开始按钮的最终状态
+  useEffect(() => {
+    console.log('isAllHumanSpectators:', isAllHumanSpectators);
+    console.log('isHost:', isHost);
+    console.log('showSpecialStartButton:', showSpecialStartButton);
+    console.log('nonSpectatingPlayersCount:', nonSpectatingPlayersCount);
+    console.log('botPlayerCount:', botPlayerCount);
+    console.log('isSpecialStartButtonEnabled:', isSpecialStartButtonEnabled);
+  }, [isAllHumanSpectators, isHost, showSpecialStartButton, nonSpectatingPlayersCount, isSpecialStartButtonEnabled, team, botPlayerCount]);
 
   // 获取可用的机器人种类
   const fetchBotTypes = useCallback(async () => {
@@ -206,8 +268,23 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
   };
 
   const handleClickForceStart = () => {
-    setForceStart(!forceStart);
-    socketRef.current.emit('force_start');
+    // 如果是特殊开始模式（所有人类都是观战者且当前玩家是房主），直接开始游戏
+    if (showSpecialStartButton) {
+      console.log('=== 特殊开始模式 ===');
+      console.log('所有人类都是观战者，跳过正常force start检测');
+      console.log('机器人玩家数量:', botPlayerCount);
+      console.log('直接开始游戏...');
+
+      // 在特殊模式下，服务器会自动处理开始条件
+      // 根据服务器逻辑：没有人类玩家但有多个机器人时，forceStartNum = 0，满足开始条件
+      socketRef.current.emit('force_start');
+    } else {
+      // 正常逻辑：切换准备状态，需要满足force start条件
+      console.log('=== 正常开始模式 ===');
+      console.log('切换准备状态，等待force start条件满足');
+      setForceStart(!forceStart);
+      socketRef.current.emit('force_start');
+    }
   };
 
   const disabled_ui: boolean = useMemo(() => {
@@ -685,8 +762,17 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
       </Card>
       <Button
         variant='contained'
-        color={forceStart ? 'primary' : 'secondary'}
-        disabled={team === MaxTeamNum + 1}
+        color={
+          showSpecialStartButton
+            ? 'primary'  // 特殊开始按钮使用主色调
+            : (forceStart ? 'primary' : 'secondary')  // 正常准备按钮逻辑
+        }
+        disabled={
+          // 特殊逻辑：当所有人类都是观战者时，只有房主可以点击开始按钮
+          showSpecialStartButton
+            ? !isSpecialStartButtonEnabled  // 人机数量大于1时启用，等于1时禁用
+            : team === MaxTeamNum + 1  // 正常逻辑：观战者禁用
+        }
         size='large'
         sx={{
           width: '100%',
@@ -695,12 +781,17 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
         }}
         onClick={handleClickForceStart}
       >
-        {/* {t('force-start')}({room.forceStartNum}/ */}
-        {t('ready')}({room.forceStartNum}/
+        {showSpecialStartButton
+          ? t('start-game')  // 特殊开始按钮始终显示"开始游戏"
+          : t('ready')
+        }(
+        {showSpecialStartButton
+          ? nonSpectatingPlayersCount  // 特殊开始按钮显示总玩家数
+          : room.players.filter((player) => !player.spectating && player.forceStart).length
+        }/
         {
-          forceStartOK[
+          // 显示包括AI玩家在内的总玩家数
           room.players.filter((player) => !player.spectating).length
-          ]
         }
         )
       </Button>

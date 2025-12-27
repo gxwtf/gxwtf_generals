@@ -76,28 +76,27 @@ app.get('/get_replay/:replayId', async (req: Request, res: Response) => {
 
 app.delete('/rooms/:roomId', async (req: Request, res: Response) => {
   const roomId = req.params.roomId;
-  
+
   if (!roomPool[roomId]) {
     res.status(404).json({ error: 'Room not found' });
     return;
   }
 
   const room = roomPool[roomId];
-  
+
   // 如果游戏正在进行，停止游戏循环
   if (room.gameStarted && room.gameLoop) {
     clearInterval(room.gameLoop);
   }
-  
+
   // 通知所有玩家房间被删除
   if (io) {
     io.in(roomId).emit('room_deleted', 'Room has been deleted by admin');
     io.in(roomId).disconnectSockets(true);
   }
-  
   // 从房间池中删除房间
   delete roomPool[roomId];
-  
+
   console.log(`Room ${roomId} deleted by admin API`);
   res.status(200).json({ success: true, message: `Room ${roomId} deleted successfully` });
 });
@@ -341,12 +340,11 @@ async function handleDisconnectInRoom(room: Room, player: Player, io: Server) {
       room.players = room.players.filter((p) => p.id != player.id);
     }
 
-    room.forceStartNum = 0;
-    for (let i = 0, c = 0; i < room.players.length; ++i) {
-      if (room.players[i].forceStart) {
-        ++room.forceStartNum;
-      }
-    }
+    // 重新计算forceStartNum：只计算非机器人玩家的准备数量
+    room.forceStartNum = room.players.filter((p) =>
+      !p.spectating() && !p.isBot && p.forceStart
+    ).length;
+
     if (room.players.length < 1 && !room.keepAlive) {
       delete roomPool[room.id];
     } else {
@@ -366,24 +364,24 @@ async function endRoomGame(room: Room, io: Server, reason: string = 'Game ended 
       clearInterval(room.gameLoop);
       room.gameStarted = false;
     }
-    
+
     // 重置所有玩家状态
     room.players.forEach((player) => {
       player.reset();
       player.disconnected = false;
     });
-    
+
     // 重置房间状态
     room.forceStartNum = 0;
     room.mapGenerated = false;
     room.map = null;
     room.globalMapDiff = null;
     room.gameRecord = null;
-    
+
     // 通知所有玩家游戏结束
     io.in(room.id).emit('room_message', null, reason);
     io.in(room.id).emit('update_room', room);
-    
+
     console.log(`Room ${room.id} game ended: ${reason}`);
   } catch (e: any) {
     console.error(JSON.stringify(e, ['message', 'arguments', 'type', 'name']));
@@ -392,9 +390,36 @@ async function endRoomGame(room: Room, io: Server, reason: string = 'Game ended 
 }
 
 async function checkForcedStart(room: Room, io: Server) {
-  let forceStartNum = forceStartOK[room.players.filter((player) => !player.spectating()).length];
+  // 计算非机器人玩家数量
+  const humanPlayers = room.players.filter((player) => !player.spectating() && !player.isBot);
+  const botPlayers = room.players.filter((player) => !player.spectating() && player.isBot);
 
-  if (!room.gameStarted && room.forceStartNum >= forceStartNum) {
+  // 检查是否所有人类玩家都是观战者
+  const allHumanSpectators = room.players.filter(p => !p.isBot).every(p => p.spectating());
+
+  // 特殊边界情况处理
+  let forceStartNum;
+
+  if (allHumanSpectators) {
+    // 情况0：所有人类都是观战者 - 需要房主手动开始
+    forceStartNum = Infinity; // 设置为无限大，防止自动开始
+  } else if (humanPlayers.length === 0 && botPlayers.length > 1) {
+    // 情况1：没有人类玩家但有多个机器人 - 满足开始条件
+    forceStartNum = 0;
+  } else if (humanPlayers.length === 1 && botPlayers.length > 0) {
+    // 情况2：只有1个人类玩家但有机器人 - 满足开始条件
+    forceStartNum = 1;
+  } else {
+    // 正常情况：根据人类玩家数量决定强制开始阈值
+    forceStartNum = forceStartOK[humanPlayers.length];
+  }
+
+  // 计算非机器人玩家的强制开始数量
+  const humanForceStartNum = room.players.filter((player) =>
+    !player.spectating() && !player.isBot && player.forceStart
+  ).length;
+
+  if (!room.gameStarted && humanForceStartNum >= forceStartNum) {
     await handleGame(room, io);
   }
 }
@@ -663,13 +688,15 @@ io.on('connection', async (socket) => {
     });
     let playerTeam = availableTeam[0];
 
-    player = new Player(playerId, socket.id, username, playerColor, playerTeam);
-    console.log(`Connect! Socket ${socket.id}, room ${roomId} name ${username} playerId ${playerId} color ${playerColor}`);
+    // 自动识别机器人：如果用户名包含"bot"字样，则标记为机器人
+    const isBot = username.toLowerCase().includes('bot');
+
+    player = new Player(playerId, socket.id, username, playerColor, playerTeam, false, false, false, 0, [], null, null, false, isBot);
+    console.log(`Connect! Socket ${socket.id}, room ${roomId} name ${username} playerId ${playerId} color ${playerColor} isBot: ${isBot}`);
 
     if (room.players.length === 0) {
       player.setRoomHost(true);
     }
-
     socket.emit('set_player_id', player.id);
 
     let message = 'joined the room.';
@@ -859,14 +886,37 @@ io.on('connection', async (socket) => {
 
   socket.on('force_start', async () => {
     try {
+      // 检查是否所有人类都是观战者
+      const allHumanSpectators = room.players.filter(p => !p.isBot).every(p => p.spectating());
+
+      if (allHumanSpectators) {
+        // 特殊开始模式：所有人类都是观战者，房主可以直接开始游戏
+        if (player.isRoomHost) {
+          console.log('=== 特殊开始模式 ===');
+          console.log('所有人类都是观战者，房主直接开始游戏');
+          await handleGame(room, io);
+          return;
+        } else {
+          socket.emit('error', 'Force start failed', '只有房主可以在所有人类都是观战者时开始游戏');
+          return;
+        }
+      }
+
+      // 正常逻辑：切换准备状态
       let playerIndex = getPlayerIndex(room, player.id);
       if (!room.players[playerIndex].spectating()) {
         if (room.players[playerIndex].forceStart === true) {
           room.players[playerIndex].forceStart = false;
-          --room.forceStartNum;
+          // 只有非机器人玩家才影响强制开始计数
+          if (!room.players[playerIndex].isBot) {
+            --room.forceStartNum;
+          }
         } else {
           room.players[playerIndex].forceStart = true;
-          ++room.forceStartNum;
+          // 只有非机器人玩家才影响强制开始计数
+          if (!room.players[playerIndex].isBot) {
+            ++room.forceStartNum;
+          }
         }
         io.in(room.id).emit('update_room', room);
       }
@@ -892,18 +942,18 @@ io.on('connection', async (socket) => {
       } else if (action === 'leave_room') {
         // 结束游戏并删除房间
         await endRoomGame(room, io, 'Room closed by host');
-        
+
         // 通知所有玩家房间被删除
         io.in(room.id).emit('room_deleted', 'Room has been closed by host');
-        
+
         // 断开所有玩家的连接
         io.in(room.id).disconnectSockets(true);
-        
+
         // 从房间池中删除房间（如果不是keepAlive房间）
         if (!room.keepAlive) {
           delete roomPool[room.id];
         }
-        
+
         console.log(`Room ${room.id} closed by host ${player.username}`);
       }
     } catch (e: any) {
