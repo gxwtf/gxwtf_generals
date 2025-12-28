@@ -4,7 +4,6 @@ const nextConfig = {
   i18n,
   reactStrictMode: false,
   swcMinify: true,
-  output: 'standalone',
 };
 
 module.exports = nextConfig;
