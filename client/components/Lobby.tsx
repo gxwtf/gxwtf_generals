@@ -63,7 +63,7 @@ function Lobby() {
     const checkBotServerStatus = async () => {
       try {
         const botServerUrl = process.env.NEXT_PUBLIC_BOT_SERVER_API || 'http://localhost:1214';
-        const res = await fetch(`${botServerUrl}/type`);
+        const res = await fetch(`${botServerUrl}/type/`);
         if (res.ok) {
           setBotServerStatus(true);
         } else {
