@@ -85,7 +85,7 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
 
   const router = useRouter();
 
-  const BOT_SERVER_URL = process.env.NEXT_PUBLIC_BOT_SERVER_URL || 'http://localhost:1214';
+  const BOT_SERVER_URL = process.env.NEXT_PUBLIC_BOT_SERVER_API || 'http://localhost:1214';
 
   // 检查是否所有人类玩家都是观战者（以 team === MaxTeamNum + 1 为准）
   // spectator = team === MaxTeamNum + 1
