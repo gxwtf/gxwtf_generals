@@ -107,7 +107,7 @@ export default function OverDialog() {
           {room.gameStarted ? t('spectate') : t('play-again')}
         </Button>
         {isHost && room?.gameStarted && (
-          <Button color='warning' sx={{ width: '100%' }} onClick={handleForceStop}>
+          <Button color='error' sx={{ width: '100%' }} onClick={handleForceStop}>
             {t('force-end')}
           </Button>
         )}

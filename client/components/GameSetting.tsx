@@ -40,6 +40,7 @@ import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTranslation } from 'next-i18next';
 
 import SliderBox from './SliderBox';
@@ -214,6 +215,33 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
         duration: 2000,
       });
       console.error('Error removing bot:', error);
+    }
+  };
+
+  // 删除整个房间的所有机器人
+  const handleRemoveAllBots = async () => {
+    try {
+      const response = await fetch(`${BOT_SERVER_URL}/remove/?roomId=${room.id}`);
+      if (response.ok) {
+        snackStateDispatch({
+          type: 'update',
+          title: '',
+          message: t('all-bots-removed-success'),
+          status: 'success',
+          duration: 2000,
+        });
+      } else {
+        throw new Error('Failed to remove all bots');
+      }
+    } catch (error) {
+      snackStateDispatch({
+        type: 'update',
+        title: '',
+        message: t('all-bots-remove-failed'),
+        status: 'error',
+        duration: 2000,
+      });
+      console.error('Error removing all bots:', error);
     }
   };
 
@@ -668,52 +696,65 @@ const GameSetting: React.FC<GameSettingProps> = (props) => {
                   {botError}
                 </Alert>
               )}
-              <Box>
+              <Typography
+                sx={{
+                  mr: 2,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {t('available-bot-types')}
+              </Typography>
+              {availableBotTypes.length > 0 ? (
+                <List dense>
+                  {availableBotTypes.map((botType, index) => (
+                    <ListItem key={index}>
+                      <ListItemText primary={botType} />
+                      <ListItemSecondaryAction>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <IconButton
+                            edge="end"
+                            onClick={() => handleAddBot(botType)}
+                            disabled={disabled_ui}
+                          >
+                            <AddIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            onClick={() => handleRemoveBot(botType)}
+                            disabled={disabled_ui}
+                          >
+                            <RemoveIcon />
+                          </IconButton>
+                        </Box>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                  {/* 移除全部机器人按钮 */}
+                  <ListItem>
+                    <ListItemText primary={t('remove-all-bots')} />
+                    <ListItemSecondaryAction>
+                      <IconButton
+                        edge="end"
+                        onClick={handleRemoveAllBots}
+                        disabled={disabled_ui || botPlayerCount === 0}
+                        color="error"
+                        title={t('remove-all-bots')}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                </List>
+              ) : (
                 <Typography
                   sx={{
                     mr: 2,
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {t('available-bot-types')}
+                  {t('no-bots-available')}
                 </Typography>
-                {availableBotTypes.length > 0 ? (
-                  <List dense>
-                    {availableBotTypes.map((botType, index) => (
-                      <ListItem key={index}>
-                        <ListItemText primary={botType} />
-                        <ListItemSecondaryAction>
-                          <Box sx={{ display: 'flex', gap: 1 }}>
-                            <IconButton
-                              edge="end"
-                              onClick={() => handleAddBot(botType)}
-                              disabled={disabled_ui}
-                            >
-                              <AddIcon />
-                            </IconButton>
-                            <IconButton
-                              edge="end"
-                              onClick={() => handleRemoveBot(botType)}
-                              disabled={disabled_ui}
-                            >
-                              <RemoveIcon />
-                            </IconButton>
-                          </Box>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                    ))}
-                  </List>
-                ) : (
-                  <Typography
-                    sx={{
-                      mr: 2,
-                      whiteSpace: 'nowrap',
-                    }}
-                  >
-                    {t('no-bots-available')}
-                  </Typography>
-                )}
-              </Box>
+              )}
             </Box>
           </TabPanel>
         </CardContent>

@@ -120,11 +120,11 @@ export default function SurrenderDialog({
             </Button>
             {isHost && (
               <>
-                <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('leave_room')}>
+                {/* <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('leave_room')}>
                   {t('close-room')}
-                </Button>
+                </Button> */}
                 {room?.gameStarted && (
-                  <Button color='warning' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
+                  <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
                     {t('force-end')}
                   </Button>
                 )}
@@ -137,7 +137,7 @@ export default function SurrenderDialog({
               {t('surrender')}
             </Button>
             {isHost && room?.gameStarted && (
-              <Button color='warning' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
+              <Button color='error' sx={{ width: '100%' }} onClick={() => handleHostAction('force_end')}>
                 {t('force-end')}
               </Button>
             )}

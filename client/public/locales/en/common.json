@@ -59,7 +59,7 @@
   "priority": "Priority",
   "revealed": "Revealed",
   "anonymous": "Anonymous",
-  "force-start": "Force Start", 
+  "force-start": "Force Start",
   "ready": "Ready",
   "start-game": "Start Game",
   "message-center": "Message Center",
@@ -151,6 +151,9 @@
     "mouse-wheel": "Mouse Wheel",
     "wsad": "WSAD / ArrowKey / MouseClick / TouchDrag on Mobile",
     "enter": "Enter",
+    "remove-all-bots": "Remove All Bots",
+    "all-bots-removed-success": "All bots removed successfully",
+    "all-bots-remove-failed": "Failed to remove all bots",
     "surrender": "Surrender"
   }
 }
