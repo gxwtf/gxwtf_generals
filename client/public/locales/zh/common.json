@@ -9,6 +9,7 @@
   "username-placeholder": "输入用户名，不超过 15 个字符",
   "greet": "欢迎你，",
   "gserver": "将军棋后端服务器",
+  "botserver": "机器人服务器",
   "bot": "机器人",
   "online": "在线",
   "offline": "离线",

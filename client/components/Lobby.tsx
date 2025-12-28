@@ -23,6 +23,7 @@ import {
 import { Room, RoomPool } from '@/lib/types';
 import { useTranslation } from 'next-i18next';
 import StorageIcon from '@mui/icons-material/Storage';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
 import { AddHomeOutlined, MapOutlined } from '@mui/icons-material';
 
 function Lobby() {
@@ -33,6 +34,7 @@ function Lobby() {
   const [snackMessage, setSnackMessage] = useState('');
   const [username, setUsername] = useState('');
   const [serverStatus, setServerStatus] = useState(true);
+  const [botServerStatus, setBotServerStatus] = useState(false);
   const router = useRouter();
 
   const { t } = useTranslation();
@@ -56,10 +58,31 @@ function Lobby() {
         setServerStatus(false);
       }
     };
+
+    // 检查botserver连接状态
+    const checkBotServerStatus = async () => {
+      try {
+        const botServerUrl = process.env.NEXT_PUBLIC_BOT_SERVER_API || 'http://localhost:1214';
+        const res = await fetch(`${botServerUrl}/type`);
+        if (res.ok) {
+          setBotServerStatus(true);
+        } else {
+          setBotServerStatus(false);
+        }
+      } catch (err: any) {
+        setBotServerStatus(false);
+      }
+    };
+
     fetchRooms();
+    checkBotServerStatus();
+
     let fetchInterval = setInterval(fetchRooms, 2000);
+    let botCheckInterval = setInterval(checkBotServerStatus, 5000);
+
     return () => {
       clearInterval(fetchInterval);
+      clearInterval(botCheckInterval);
     };
   }, []);
 
@@ -160,6 +183,34 @@ function Lobby() {
                   />
                   <Typography fontSize='0.9rem' color='white' sx={{ display: 'inline' }}>
                     {serverStatus ? t('online') : t('offline')}
+                  </Typography>
+                </Box>
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <SmartToyIcon />
+                </ListItemIcon>
+                <ListItemText
+                  id='bot-server'
+                  primary={
+                    <Typography color='primary'>{t('botserver')}</Typography>
+                  }
+                  secondary={process.env.NEXT_PUBLIC_BOT_SERVER_API || 'http://localhost:1214'}
+                />
+                <Box sx={{ position: 'relative', right: 0 }}>
+                  <Box
+                    component='span'
+                    sx={{
+                      bgcolor: botServerStatus ? 'lightgreen' : 'red',
+                      width: '0.7em',
+                      height: '0.7em',
+                      borderRadius: '50%',
+                      display: 'inline-block',
+                      marginRight: 1,
+                    }}
+                  />
+                  <Typography fontSize='0.9rem' color='white' sx={{ display: 'inline' }}>
+                    {botServerStatus ? t('online') : t('offline')}
                   </Typography>
                 </Box>
               </ListItem>
