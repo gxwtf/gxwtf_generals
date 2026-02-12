@@ -14,7 +14,7 @@ export async function createRoom(
       throw new Error('Room count exceeded');
     if (!roomId) {
       ++roomCount;
-      roomId = String(roomCount + 1);
+      roomId = String(roomCount);
     }
     let newRoom = new Room(roomId, roomName);
     roomPool[roomId] = newRoom;
@@ -39,13 +39,13 @@ export async function createRoom(
 // });
 
 // Warring state
-roomPool['warring_state'] = Room.create({
-  id: 'warring_state',
-  roomName: '战国模式 Warring State',
-  warringStatesMode: true,
-  revealKing: true,
-  keepAlive: true,
-});
+// roomPool['warring_state'] = Room.create({
+//   id: 'warring_state',
+//   roomName: '战国模式 Warring State',
+//   warringStatesMode: true,
+//   revealKing: true,
+//   keepAlive: true,
+// });
 
 // mobile
 // roomPool['mobile'] = Room.create({
